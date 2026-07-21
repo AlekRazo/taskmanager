@@ -165,8 +165,11 @@ public class TaskService : ITaskService
         task.StatusId = dto.Status;
         task.UserId = dto.User;
         
-        _context.Tasks.Update(task);
         await _context.SaveChangesAsync();
+
+        await _context.Entry(task).Reference(t => t.Priority).LoadAsync();
+        await _context.Entry(task).Reference(t => t.Status).LoadAsync();
+        await _context.Entry(task).Reference(t => t.User).LoadAsync();
 
         return Map(task);
     }
