@@ -4,9 +4,10 @@ namespace TaskManager.Models.DTO.Auth;
 
 public record RegisterUserRequestDto
 {
-    [Required]
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
     public string Username { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    [DataType(DataType.Password)]
     public string Password { get; set; } = "";
 }

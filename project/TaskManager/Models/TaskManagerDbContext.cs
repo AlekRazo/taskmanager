@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskManager.Models.Domain;
 
 namespace TaskManager.Models;
 
@@ -65,7 +66,7 @@ public class TaskManagerDbContext : DbContext
 
         modelBuilder.Entity<TaskModel>(entity =>
         {
-            entity.ToTable("task");
+            entity.ToTable("task", "dbo", tb => tb.HasTrigger("TRG_during_update_task"));
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id)
                 .HasColumnName("id");

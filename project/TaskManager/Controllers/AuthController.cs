@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TaskManager.Common;
-using TaskManager.Models;
+using TaskManager.Models.DTO;
 using TaskManager.Models.DTO.Auth;
-using TaskManager.Repositories;
+using TaskManager.Services;
 
 namespace TaskManager.Controllers;
 
@@ -11,54 +10,28 @@ namespace TaskManager.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly TaskManagerDbContext _context;
-    private readonly ITokenRepository _tokenRepository;
+    private readonly IAuthService _service;
 
-    public AuthController(TaskManagerDbContext context, ITokenRepository tokenRepository)
+    public AuthController(IAuthService service)
     {
-        _context = context;
-        _tokenRepository = tokenRepository;
+        _service = service;
     }
 
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserRequestDto registerUserRequestDto)
+    public async Task<IActionResult> Register([FromBody] RegisterUserRequestDto dto)
     {
-        var exists = await _context.Users.AnyAsync(u => u.UserName == registerUserRequestDto.Username);
+        var response = await _service.Register(dto);
 
-        if (exists)
-            return Conflict(ApiResponse<string>.ErrorResponse(new List<string> {"El usuario ya se encuentra registrado."}, "Ocurrió un error", 409));
-        
-        var user = new UserModel
-        {
-            UserName = registerUserRequestDto.Username,
-            Password = BCrypt.Net.BCrypt.HashPassword(registerUserRequestDto.Password)
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return Ok(ApiResponse<string>.SuccessResponse("Usario registrado exitosamente", "Éxito", 201));
+        return Ok(ApiResponse<RegisterUserResponseDto>.SuccessResponse(response,"Usuario registrado exitosamente.", 201));
     }
     
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == loginRequestDto.Username);
-
-        if (user != null && BCrypt.Net.BCrypt.Verify(loginRequestDto.Password, user.Password))
-        {
-            var jwtToken = _tokenRepository.CreateJWTToken(user);
-
-            var response = new LoginResponseDto
-            {
-                JwtToken = jwtToken
-            };
-
-            return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(response, "Bienvenido.", 200));
-        }
-
-        return BadRequest(ApiResponse<string>.ErrorResponse(new List<string> {"El usuario o contraseña son incorrectos."}, "Ocurrió un error", 409));
+        var response = await _service.Login(dto);
+        
+        return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(response, "Bienvenido.", 200));
     }
 }

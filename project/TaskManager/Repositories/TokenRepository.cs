@@ -1,10 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using TaskManager.DTO;
-using TaskManager.Models;
+using TaskManager.Models.Domain;
 
 namespace TaskManager.Repositories;
 

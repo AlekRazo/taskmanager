@@ -1,14 +1,31 @@
-namespace TaskManager.Models.DTO.Task;
+using System.ComponentModel.DataAnnotations;
+
+namespace TaskManager.Models.DTO.Tasks;
 
 public record CreateTaskDto
 {
-    public int Id { get; set; }
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
     public string Title { get; set; } = "";
+    
+    [MaxLength(500, ErrorMessage = "Descripción no permite más de 500 caracteres.")]
     public string Description { get; set; } = "";
-    public string Priority { get; set; } = "";
-    public DateTime CreateDate { get; set; }
-    public DateTime FinishDate { get; set; }
-    public DateTime LimitDate { get; set; }
-    public string Status { get; set; } = "";
-    public string User { get; set; } = "";
+    
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    public short Priority { get; set; }
+    
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    [DataType(DataType.Date)]
+    public DateOnly CreateDate { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateOnly FinishDate { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateOnly LimitDate { get; set; }
+
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    public short Status { get; set; }
+
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    public int User { get; set; }
 }
