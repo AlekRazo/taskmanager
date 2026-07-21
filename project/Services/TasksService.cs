@@ -52,7 +52,7 @@ public class TaskService : ITaskService
             .Take(pageSize)
             .ToListAsync();
 
-        var total = await _context.Tasks.CountAsync();
+        var total = await query.CountAsync();
 
         return new PagedResultDto<TaskResponseDto>
         {
@@ -96,7 +96,7 @@ public class TaskService : ITaskService
         if(dto.FinishDate > dto.LimitDate)
             errors.Add("La fecha de finalización no puede ser posterior a la fecha límite.");
 
-        var exists = await _context.Tasks.AnyAsync(t => t.Title == dto.Title);
+        var exists = await _context.Tasks.AnyAsync(t => t.UserId == dto.User && t.Title == dto.Title);
 
         if(exists)
             errors.Add("Ya existe una tarea con el título ingresado.");
@@ -139,10 +139,10 @@ public class TaskService : ITaskService
             errors.Add("La fecha de finalización no puede ser posterior a la fecha límite.");
 
         //Se debe verificar que no exista otra tarea con el mismo nombre, de forma que sí se pueda modificar aquella con el ID en cuestión
-        var exists = await _context.Tasks.AnyAsync(t => t.Title == dto.Title && t.Id != id);
+        var exists = await _context.Tasks.AnyAsync(t => t.UserId == dto.User && t.Title == dto.Title && t.Id != id);
 
         if(exists)
-            errors.Add("Ya existe una tarea con el título ingresado.");
+            errors.Add("Ya existe una tarea con el título ingresado para este usuario.");
 
         if(errors.Count > 0)
             throw new BusinessException("Error al modificar tarea", errors);

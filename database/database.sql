@@ -44,7 +44,12 @@ CREATE TABLE [dbo].[task](
 	CONSTRAINT [PK_task] PRIMARY KEY([id]),
 	CONSTRAINT [FK_task_user] FOREIGN KEY([user_id]) REFERENCES [user](id),
 	CONSTRAINT [FK_task_status] FOREIGN KEY([status_id]) REFERENCES [status](id),
-	CONSTRAINT [FK_task_priority] FOREIGN KEY([priority_id]) REFERENCES [priority](id)
+	CONSTRAINT [FK_task_priority] FOREIGN KEY([priority_id]) REFERENCES [priority](id),
+	CONSTRAINT [UQ_task_user_title] UNIQUE ([user_id], [title]),
+	INDEX [IX_task_user_id] ([user_id]),
+	INDEX [IX_task_status_id] ([status_id]),
+	INDEX [IX_task_priority_id] ([priority_id]),
+	INDEX [IX_task_limit_date] ([limit_date]),
 );
 
 CREATE TABLE [dbo].[audit](
@@ -58,7 +63,7 @@ CREATE TABLE [dbo].[audit](
 GO
 
 ---- STORED PROCEDURE ----
-CREATE PROCEDURE sp_GetPendingTasks @idUser INT
+CREATE PROCEDURE [dbo].[sp_GetPendingTasks]
 AS
 BEGIN
 	SELECT [u].[username], 
@@ -66,9 +71,11 @@ BEGIN
 	COUNT(CASE WHEN t.[limit_date] < CONVERT(DATE, GETDATE()) THEN 1 END) AS [total_vencidas]
 	FROM [dbo].[task] t
 	INNER JOIN [dbo].[user] u ON t.[user_id] = u.[id]
-	WHERE u.[id] = @idUser
 	GROUP BY u.[username]
+	ORDER BY u.[username] ASC
 END;
+
+CREATE INDEX IX_task_user_status_limitdate ON [dbo].[task]([user_id], [status_id], [limit_date]);
 
 ---- TRIGGER ----
 GO
@@ -79,7 +86,7 @@ BEGIN
 	INSERT INTO [dbo].[audit] ([task_id], [record])
 	SELECT 
         [i].[id],
-        'Status changed from ' + [dst].[status] + 'to ' + [ist].[status]
+        'Status changed from ' + [dst].[status] + ' to ' + [ist].[status]
     FROM INSERTED i
     INNER JOIN DELETED d ON [i].[id] = [d].[id]
 	INNER JOIN [dbo].[status] ist ON i.[status_id] = [ist].[id]
