@@ -7,6 +7,16 @@ using TaskManager.Models.DTO.Tasks;
 
 namespace TaskManager.Services;
 
+/*
+En el service se implementa lógica de negocio que incluye las siguientes validaciones:
+- No permitir fechas límite menores a hoy.
+- No permitir dos tareas con el mismo título para un mismo usuario.
+
+Las siguientes validaciones se realizan mediante anotaciones en las DTO y modelos:
+- El título es obligatorio.
+- La descripción máximo 500 caracteres.
+*/
+
 public class TaskService : ITaskService
 { 
     private readonly TaskManagerDbContext _context;

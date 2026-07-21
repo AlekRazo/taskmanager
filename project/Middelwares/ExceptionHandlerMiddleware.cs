@@ -4,6 +4,14 @@ using TaskManager.Common.Exceptions;
 
 namespace TaskManager.Middlewares;
 
+/*
+En el middleware se manejan los errores que pudieran presentarse en tiempo de ejecución:
+- 400
+- 404
+- 500
+
+Estos errores son retornados en la respuesta estándar (ApiResponse<T>).
+*/
 public class ExceptionHandlerMiddleware
 {
     private readonly RequestDelegate _next;
