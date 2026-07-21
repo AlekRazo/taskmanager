@@ -52,6 +52,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse(); // evita que el middleware escriba su respuesta default
+
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            var response = ApiResponse<object>.ErrorResponse(
+                errors: new List<string> { "Token inválido, expirado o no proporcionado." },
+                message: "No autorizado",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
+
+            await context.Response.WriteAsJsonAsync(response);
+        }
+    };
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();

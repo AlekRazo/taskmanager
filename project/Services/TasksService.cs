@@ -18,6 +18,12 @@ public class TaskService : ITaskService
 
     public async Task<PagedResultDto<TaskResponseDto>> GetAllAsync(int page, int pageSize, short? priorityId, short? statusId, int? userId, DateOnly? fechaInicial, DateOnly? fechaFinal)
     {
+        if (!fechaInicial.HasValue && fechaFinal.HasValue)
+            throw new BusinessException("Error de proceso", new List<string> { "No puede existir fecha final sin fecha de inicio." });
+
+        if (fechaInicial.HasValue && fechaFinal.HasValue && fechaFinal < fechaInicial)
+            throw new BusinessException("Error de proceso", new List<string> { "La fecha final no puede ser anterior a la fecha de inicio." });
+
         var query = _context.Tasks
             .Include(t => t.Priority)
             .Include(t => t.Status)
