@@ -80,7 +80,7 @@ CREATE INDEX IX_task_user_status_limitdate ON [dbo].[task]([user_id], [status_id
 ---- TRIGGER ----
 GO
 
-CREATE TRIGGER [dbo].[TRG_during_update_task] ON [dbo].[task]
+CREATE TRIGGER [dbo].[trg_during_update_task] ON [dbo].[task]
 AFTER UPDATE AS
 BEGIN
 	INSERT INTO [dbo].[audit] ([task_id], [record])
